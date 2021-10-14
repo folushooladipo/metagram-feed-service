@@ -18,7 +18,7 @@ yarn
 ```bash
 yarn dev
 ```
-- The app will be available at `http://localhost:8080`
+- The app will be available at `http://localhost:8082`
 
 ## Making requests
 I have included a Postman collection in the root directory that contains all requests and info about what they need to run (tokens, API keys) etc. The collection is `./metagram-restapi.postman_collection.json`.

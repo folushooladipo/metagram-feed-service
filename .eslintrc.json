@@ -1,5 +1,8 @@
 {
   "root": true,
+  "globals": {
+    "module": "readonly"
+  },
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint"

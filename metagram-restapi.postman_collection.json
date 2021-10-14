@@ -375,23 +375,6 @@
 					"response": []
 				},
 				{
-					"name": "~/feed Get feed items",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api-home}}/feed",
-							"host": [
-								"{{api-home}}"
-							],
-							"path": [
-								"feed"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "~/image/filter: Apply a filter to image",
 					"request": {
 						"auth": {
@@ -488,7 +471,7 @@
 	"variable": [
 		{
 			"key": "api-home",
-			"value": "http://localhost:8080/api/v0"
+			"value": "http://localhost:8082/api/v0"
 		}
 	]
 }

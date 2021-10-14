@@ -2,7 +2,7 @@ import {Router} from "express"
 
 import {getGetSignedUrl, getPutSignedUrl} from "../../../../aws"
 import {FeedItem} from "../models/FeedItem"
-import {requireAuth} from "../../users/routes/auth.router"
+import {requireAuth} from "../../../../middleware"
 
 const router: Router = Router()
 
@@ -18,11 +18,34 @@ router.get("/", async (req, res) => {
   })
 })
 
+/* To see why I made fileName optional, make it required and see how the handler
+for GET /feed/:id gets called instead of this one when a request like
+GET /feed/signed-url/<NOTHING> is made. And this handler is defined before that one,
+so reordering handlers didn't help.
+*/
+router.get("/signed-url/:fileName?", requireAuth, (req, res) => {
+  const {fileName} = req.params
+  if (!fileName) {
+    return res.status(400).json({
+      error: "Please specify the filename that you need a URL for.",
+    })
+  }
+
+  const url = getPutSignedUrl(fileName)
+  res.status(201).json({url})
+})
+
 router.get("/:id", async (req, res) => {
   const {id} = req.params
   if (!id) {
-    return res.status(404).json({
-      error: "Please specify the ID of the feed item that you want to get.",
+    return res.status(400).json({
+      error: "Specify the ID of the feed item that you want.",
+    })
+  }
+
+  if (Number.isNaN(Number(id))) {
+    return res.status(400).json({
+      error: "Specify a numeric value for the ID of the feed item that you want.",
     })
   }
 
@@ -68,13 +91,6 @@ router.patch("/:id", requireAuth, async (req, res) => {
   item.url = getGetSignedUrl(item.url)
   res.status(200)
     .json(item)
-})
-
-// Get a signed url to put a new item in the bucket
-router.get("/signed-url/:fileName", requireAuth, (req, res) => {
-  const {fileName} = req.params
-  const url = getPutSignedUrl(fileName)
-  res.status(201).json({url})
 })
 
 // Post meta data and the filename after a file is uploaded

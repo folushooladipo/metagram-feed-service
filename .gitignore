@@ -32,6 +32,7 @@ $RECYCLE.BIN/
 postgres_dev/
 logfile
 todo.txt
+set_env.sh
 
 .DS_Store
 Thumbs.db

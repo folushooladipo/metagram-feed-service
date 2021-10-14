@@ -1,0 +1,11 @@
+# Directories
+.git
+.vscode
+mock
+node_modules
+www
+
+# Files
+.env
+set_env.sh
+todo.txt

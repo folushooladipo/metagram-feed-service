@@ -1,4 +1,5 @@
 import express, {json as parseJsonBody} from "express"
+import cors from "cors"
 
 import {IndexRouter} from "./controllers/v0/index.router"
 import {V0_MODELS} from "./controllers/v0/model.index"
@@ -14,6 +15,22 @@ const DEFAULT_PORT = 8082;
   const port = process.env.PORT || DEFAULT_PORT
 
   app.use(parseJsonBody())
+
+  const knownOrigins: string[] = []
+  if (process.env.FRONTEND_APP_URL) {
+    knownOrigins.push(process.env.FRONTEND_APP_URL)
+  }
+  const corsOptions = {
+    origin: (origin: string, callback: (err: Error, isKnownOrigin?: boolean) => void) => {
+      if (knownOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true)
+      } else {
+        callback(new Error("Not allowed by CORS"))
+      }
+    },
+    optionsSuccessStatus: 200,
+  }
+  app.use(cors(corsOptions))
 
   app.use((req, res, next) => {
     res.set(

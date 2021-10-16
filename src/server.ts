@@ -1,5 +1,4 @@
 import express, {json as parseJsonBody} from "express"
-import cors from "cors"
 
 import {IndexRouter} from "./controllers/v0/index.router"
 import {V0_MODELS} from "./controllers/v0/model.index"
@@ -16,20 +15,6 @@ const DEFAULT_PORT = 8082;
 
   app.use(parseJsonBody())
 
-  const knownOrigins = [
-    "http://localhost:4200",
-  ]
-  const corsOptions = {
-    origin: (origin: string, callback: (err: Error, isKnownOrigin?: boolean) => void) => {
-      if (knownOrigins.indexOf(origin) !== -1 || !origin) {
-        callback(null, true)
-      } else {
-        callback(new Error("Not allowed by CORS"))
-      }
-    },
-    optionsSuccessStatus: 200,
-  }
-  app.use(cors(corsOptions))
   app.use((req, res, next) => {
     res.set(
       "Access-Control-Allow-Headers",

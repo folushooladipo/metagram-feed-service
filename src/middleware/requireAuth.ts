@@ -1,10 +1,7 @@
 import {NextFunction, Request, Response} from "express"
 import superagent from "superagent"
 
-import {config as loadEnvironmentVariables} from "dotenv"
-
-// TODO: can't I just have this called only once in the root file of the project?
-loadEnvironmentVariables()
+import {config} from "../config/config"
 
 const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.headers || !req.headers.authorization) {
@@ -19,7 +16,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   }
 
   superagent
-    .get(process.env.AUTH_ENDPOINT)
+    .get(config.authEndpoint)
     .set({Authorization: bearer})
     .then(() => next())
     .catch((err) => {

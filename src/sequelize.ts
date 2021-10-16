@@ -3,9 +3,7 @@ import {readFileSync} from "fs"
 
 import {config} from "./config/config"
 
-const devConfig = config.dev
-
-const isLocalEnv = process.env.NODE_ENV === "local"
+const {isLocalEnv} = config
 const dialectOptions = isLocalEnv
   ? {}
   : {
@@ -16,10 +14,10 @@ const dialectOptions = isLocalEnv
   }
 
 export const sequelize = new Sequelize({
-  username: devConfig.username,
-  password: devConfig.password,
-  database: devConfig.database,
-  host: devConfig.host,
+  username: config.username,
+  password: config.password,
+  database: config.database,
+  host: config.host,
   dialect: "postgres",
   ssl: isLocalEnv ? false : true,
   dialectOptions,

@@ -3,6 +3,7 @@ import cors from "cors"
 
 import {IndexRouter} from "./controllers/v0/index.router"
 import {V0_MODELS} from "./controllers/v0/model.index"
+import {config} from "./config/config"
 import {sequelize} from "./sequelize"
 
 const DEFAULT_PORT = 8082;
@@ -12,13 +13,14 @@ const DEFAULT_PORT = 8082;
   await sequelize.sync()
 
   const app = express()
-  const port = process.env.PORT || DEFAULT_PORT
+  const port = config.port || DEFAULT_PORT
 
   app.use(parseJsonBody())
 
   const knownOrigins: string[] = []
-  if (process.env.FRONTEND_APP_URL) {
-    knownOrigins.push(process.env.FRONTEND_APP_URL)
+  const {frontendUrl} = config
+  if (frontendUrl) {
+    knownOrigins.push(frontendUrl)
   }
   const corsOptions = {
     origin: (origin: string, callback: (err: Error, isKnownOrigin?: boolean) => void) => {

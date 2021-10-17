@@ -16,13 +16,13 @@ before_script:
 script:
   - docker --version
   - docker build -t feed-service .
-  # - docker tag feed-service folushooladipo/metagram-feed-service:v1.0.4
-  # - docker tag feed-service folushooladipo/metagram-feed-service:latest
+  - docker tag feed-service folushooladipo/metagram-feed-service:v1.0.5
+  - docker tag feed-service folushooladipo/metagram-feed-service:latest
   - docker tag feed-service folushooladipo/metagram-feed-service:debug
 
 # Tasks to perform after the process is successful. Formatting the Docker username and password as below enables you to programmatically log in without having the password exposed in logs.
 after_success:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  # - docker push folushooladipo/metagram-feed-service:v1.0.4
-  # - docker push folushooladipo/metagram-feed-service:latest
+  - docker push folushooladipo/metagram-feed-service:v1.0.5
+  - docker push folushooladipo/metagram-feed-service:latest
   - docker push folushooladipo/metagram-feed-service:debug

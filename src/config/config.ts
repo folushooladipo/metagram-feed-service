@@ -11,6 +11,9 @@ const {
   DB_HOST,
   DB_PASSWORD,
   DB_USERNAME,
+  DEPLOYED_WITH,
+  DEPLOYED_WITH_ACCESS_KEY_ID,
+  DEPLOYED_WITH_SECRET_ACCESS_KEY,
   FRONTEND_APP_URL,
   NODE_ENV,
   PORT,
@@ -21,6 +24,11 @@ export const config = {
   port: PORT,
   authEndpoint: AUTH_ENDPOINT,
   frontendUrl: FRONTEND_APP_URL,
+
+  // For use in non-EC2 deployment envs e.g EKS.
+  deployedWith: DEPLOYED_WITH,
+  deployedWithAccessKeyId: DEPLOYED_WITH_ACCESS_KEY_ID,
+  deployedWithSecretAccessKey: DEPLOYED_WITH_SECRET_ACCESS_KEY,
 
   username: DB_USERNAME,
   password: DB_PASSWORD,

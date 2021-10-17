@@ -2,8 +2,14 @@ import AWS = require("aws-sdk")
 
 import {config} from "./config/config"
 
-if (config.awsProfile !== "DEPLOYED") {
-  // When deployed to AWS, this configuration will be done automatically by AWS.
+// NB: When deployed to AWS EC2, this configuration will be done automatically by AWS.
+if (config.deployedWith === "eks") {
+  const credentials = new AWS.Credentials ({
+    accessKeyId: config.deployedWithAccessKeyId,
+    secretAccessKey: config.deployedWithSecretAccessKey,
+  })
+  AWS.config.credentials = credentials
+} else if (config.deployedWith !== "ec2") {
   const credentials = new AWS.SharedIniFileCredentials({profile: config.awsProfile})
   AWS.config.credentials = credentials
 }

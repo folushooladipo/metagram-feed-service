@@ -9,6 +9,11 @@ import {sequelize} from "./sequelize"
 const DEFAULT_PORT = 8082;
 
 (async () => {
+  console.log("config", JSON.stringify(config, null, 4))
+  console.log("process.env.FOO", JSON.stringify(process.env.FOO, null, 4))
+  console.log("process.env.PORT", JSON.stringify(process.env.PORT, null, 4))
+  console.log("process.env", JSON.stringify(process.env, null, 4))
+  console.log("******\n")
   sequelize.addModels(V0_MODELS)
   await sequelize.sync()
 

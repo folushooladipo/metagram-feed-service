@@ -5,14 +5,14 @@
 import {JwtPayload} from "jsonwebtoken"
 import {Router} from "express"
 
+import {FeedItem, FeedItemAttributes} from "../models/FeedItem"
 import {RequestWithTokenPayload, requireAuth} from "../../../../middleware"
 import {getGetSignedUrl, getPutSignedUrl} from "../../../../aws"
-import {FeedItem} from "../models/FeedItem"
 
 const router: Router = Router()
 
-interface FeedItemWithURL extends FeedItem {
-  url?: string
+interface FeedItemWithURL extends FeedItemAttributes {
+  url: string
 }
 
 router.get("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
@@ -21,9 +21,11 @@ router.get("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
     where: {userId},
     order: [["id", "DESC"]],
   })
-  const itemsWithSignedGetUrls = itemsData.rows.map((item: FeedItemWithURL) => {
-    item.url = getGetSignedUrl(item.fileName)
-    return item
+  const itemsWithSignedGetUrls = itemsData.rows.map((item): FeedItemWithURL => {
+    return {
+      ...item.get({plain: true}),
+      url: getGetSignedUrl(item.fileName),
+    }
   })
   res.json({
     count: itemsData.count,
@@ -63,14 +65,17 @@ router.get("/:id", requireAuth, async (req: RequestWithTokenPayload, res) => {
   }
 
   const {id: userId} = req.tokenPayload as JwtPayload
-  const item = await FeedItem.findOne({where: {id, userId}}) as FeedItemWithURL | null
+  const item = await FeedItem.findOne({where: {id, userId}})
   if (!item) {
     return res.status(404)
       .json({error: "Feed item not found."})
   }
 
-  item.url = getGetSignedUrl(item.fileName)
-  res.json(item)
+  const itemWithUrl: FeedItemWithURL = {
+    ...item.get({plain: true}),
+    url: getGetSignedUrl(item.fileName),
+  }
+  res.json(itemWithUrl)
 })
 
 router.patch("/:id", requireAuth, async (req: RequestWithTokenPayload, res) => {
@@ -102,10 +107,13 @@ router.patch("/:id", requireAuth, async (req: RequestWithTokenPayload, res) => {
       })
   }
 
-  const item = updatedRecords[0] as FeedItemWithURL
-  item.url = getGetSignedUrl(item.fileName)
+  const item = updatedRecords[0]
+  const itemWithUrl: FeedItemWithURL = {
+    ...item.get({plain: true}),
+    url: getGetSignedUrl(item.fileName),
+  }
   res.status(200)
-    .json(item)
+    .json(itemWithUrl)
 })
 
 router.post("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
@@ -122,10 +130,13 @@ router.post("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
   const {id: userId} = req.tokenPayload as JwtPayload
   const item = new FeedItem({caption, fileName, userId: userId})
 
-  const savedItem = await item.save() as FeedItemWithURL
+  const savedItem = await item.save()
+  const savedItemWithUrl: FeedItemWithURL = {
+    ...item.get({plain: true}),
+    url: getGetSignedUrl(savedItem.fileName),
+  }
 
-  savedItem.url = getGetSignedUrl(savedItem.fileName)
-  res.status(201).json(savedItem)
+  res.status(201).json(savedItemWithUrl)
 })
 
 export const FeedRouter: Router = router

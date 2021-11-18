@@ -1,7 +1,7 @@
 import {AutoIncrement, BelongsTo, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript"
 import {User} from "./User"
 
-interface FeedItemAttributes {
+export interface FeedItemAttributes {
   id: number;
   userId: number;
   caption: string;

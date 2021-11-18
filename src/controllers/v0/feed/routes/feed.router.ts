@@ -1,3 +1,7 @@
+/* TODO: Wrap all sequelize.someCall() functions in a try+catch or a then+catch. In all catches:
+- Use console.error(<MSG_UNIQUE_TO_FUNCTION>, error).
+- returning 500 statuses and a generic error message e.g "Internal server error".
+*/
 import {JwtPayload} from "jsonwebtoken"
 import {Router} from "express"
 

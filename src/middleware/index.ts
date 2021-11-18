@@ -1,5 +1,4 @@
-import requireAuth from "./requireAuth"
-
 export {
   requireAuth,
-}
+  RequestWithTokenPayload,
+} from "./requireAuth"

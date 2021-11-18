@@ -1,25 +1,40 @@
-import {Column, CreatedAt, Model, Table, UpdatedAt} from "sequelize-typescript"
+import {AutoIncrement, BelongsTo, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt} from "sequelize-typescript"
+import {User} from "./User"
 
 interface FeedItemAttributes {
   id: number;
+  userId: number;
   caption: string;
-  url: string;
+  fileName: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface FeedItemCreationAttributes {
   caption: string;
-  url: string;
+  fileName: string;
+  userId: number;
 }
 
 @Table
 export class FeedItem extends Model<FeedItemAttributes, FeedItemCreationAttributes> {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  public id!: number;
+
+  @BelongsTo(() => User, "userId")
+  public user!: User
+
+  @ForeignKey(() => User)
+  @Column
+  public userId!: number;
+
   @Column
   public caption!: string;
 
   @Column
-  public url!: string;
+  public fileName!: string;
 
   @Column
   @CreatedAt

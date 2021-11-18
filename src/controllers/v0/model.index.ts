@@ -1,3 +1,3 @@
-import {FeedItem} from "./feed/models/FeedItem"
+import {FeedItem, User} from "./feed/models"
 
-export const V0_MODELS = [ FeedItem ]
+export const V0_MODELS = [ FeedItem, User ]

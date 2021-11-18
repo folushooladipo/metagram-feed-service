@@ -1,15 +1,24 @@
+import {JwtPayload} from "jsonwebtoken"
 import {Router} from "express"
 
+import {RequestWithTokenPayload, requireAuth} from "../../../../middleware"
 import {getGetSignedUrl, getPutSignedUrl} from "../../../../aws"
 import {FeedItem} from "../models/FeedItem"
-import {requireAuth} from "../../../../middleware"
 
 const router: Router = Router()
 
-router.get("/", async (req, res) => {
-  const itemsData = await FeedItem.findAndCountAll({order: [["id", "DESC"]]})
-  const itemsWithSignedGetUrls = itemsData.rows.map((item) => {
-    item.url = getGetSignedUrl(item.url)
+interface FeedItemWithURL extends FeedItem {
+  url?: string
+}
+
+router.get("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
+  const {id: userId} = req.tokenPayload as JwtPayload
+  const itemsData = await FeedItem.findAndCountAll({
+    where: {userId},
+    order: [["id", "DESC"]],
+  })
+  const itemsWithSignedGetUrls = itemsData.rows.map((item: FeedItemWithURL) => {
+    item.url = getGetSignedUrl(item.fileName)
     return item
   })
   res.json({
@@ -23,7 +32,7 @@ for GET /feed/:id gets called instead of this one when a request like
 GET /feed/signed-url/<NOTHING> is made. And this handler is defined before that one,
 so reordering handlers didn't help.
 */
-router.get("/signed-url/:fileName?", requireAuth, (req, res) => {
+router.get("/signed-url/:fileName?", requireAuth, (req: RequestWithTokenPayload, res) => {
   const {fileName} = req.params
   if (!fileName) {
     return res.status(400).json({
@@ -35,7 +44,7 @@ router.get("/signed-url/:fileName?", requireAuth, (req, res) => {
   res.status(201).json({url})
 })
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", requireAuth, async (req: RequestWithTokenPayload, res) => {
   const {id} = req.params
   if (!id) {
     return res.status(400).json({
@@ -49,17 +58,18 @@ router.get("/:id", async (req, res) => {
     })
   }
 
-  const item = await FeedItem.findByPk(id)
+  const {id: userId} = req.tokenPayload as JwtPayload
+  const item = await FeedItem.findOne({where: {id, userId}}) as FeedItemWithURL | null
   if (!item) {
-    return res.status(400)
+    return res.status(404)
       .json({error: "Feed item not found."})
   }
 
-  item.url = getGetSignedUrl(item.url)
+  item.url = getGetSignedUrl(item.fileName)
   res.json(item)
 })
 
-router.patch("/:id", requireAuth, async (req, res) => {
+router.patch("/:id", requireAuth, async (req: RequestWithTokenPayload, res) => {
   const {caption, fileName} = req.body
   if (!caption && !fileName) {
     return res.status(400)
@@ -69,13 +79,14 @@ router.patch("/:id", requireAuth, async (req, res) => {
   }
 
   const {id} = req.params
+  const {id: userId} = req.tokenPayload as JwtPayload
   const [numberOfUpdatedRecords, updatedRecords] = await FeedItem.update(
     {
       caption,
-      url: fileName,
+      fileName,
     },
     {
-      where: {id},
+      where: {id, userId},
       returning: true,
     }
   )
@@ -87,16 +98,13 @@ router.patch("/:id", requireAuth, async (req, res) => {
       })
   }
 
-  const item = updatedRecords[0]
-  item.url = getGetSignedUrl(item.url)
+  const item = updatedRecords[0] as FeedItemWithURL
+  item.url = getGetSignedUrl(item.fileName)
   res.status(200)
     .json(item)
 })
 
-// Post meta data and the filename after a file is uploaded
-// NOTE the file name is they key name in the s3 bucket.
-// body : {caption: string, fileName: string};
-router.post("/", requireAuth, async (req, res) => {
+router.post("/", requireAuth, async (req: RequestWithTokenPayload, res) => {
   const {caption, fileName} = req.body
 
   if (!caption) {
@@ -107,19 +115,12 @@ router.post("/", requireAuth, async (req, res) => {
     return res.status(400).json({error: "File name is required."})
   }
 
-  // @TODO:
-  // - Use a migration to rename the FeedItem.url column to FeedItem.fileName. Use
-  // this as a guide:
-  // https://sequelize.org/master/manual/migrations.html
-  // - Modify all code in this app to use fileName as well.
-  const item = new FeedItem({
-    caption: caption,
-    url: fileName,
-  })
+  const {id: userId} = req.tokenPayload as JwtPayload
+  const item = new FeedItem({caption, fileName, userId: userId})
 
-  const savedItem = await item.save()
+  const savedItem = await item.save() as FeedItemWithURL
 
-  savedItem.url = getGetSignedUrl(savedItem.url)
+  savedItem.url = getGetSignedUrl(savedItem.fileName)
   res.status(201).json(savedItem)
 })
 

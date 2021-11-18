@@ -8,7 +8,7 @@
   "scripts": {
     "tsc": "tsc",
     "start": "NODE_ENV=local ts-node-dev ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 0",
     "lint": "eslint .",
     "lint-and-fix": "eslint . --fix",
     "clean": "rimraf www/ || true",

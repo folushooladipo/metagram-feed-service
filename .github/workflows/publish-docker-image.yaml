@@ -2,7 +2,7 @@ name: Publish Docker image
 
 on:
   push:
-    # TODO: find out if these values are combined using an OR or an AND.
+    # TODO: find out if these values are combined using an OR or an AND. Push to some non-master branch and see if this action runs.
     branches:
       - master
     paths:
@@ -13,6 +13,8 @@ jobs:
     name: Push Docker image to Docker Hub
 
     runs-on: ubuntu-latest
+
+    environment: docker-publishing-dev
 
     steps:
       - name: Check out the repo
